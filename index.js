@@ -9,7 +9,6 @@ const PORT = process.env.PORT;
 const baseUrl = process.env.BASE_URL;
 const secretKey = process.env.SECRET_KEY;
 
-
 const app = express();
 app.use(cors);
 app.use(express.json());
@@ -40,14 +39,14 @@ app.use(
     },
   })
 );
-
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 app.use("/urls", tolstoyRouter);
 
 const start = async () => {
   try {
-
-
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
