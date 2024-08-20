@@ -1,0 +1,18 @@
+config/default.json
+config
+node_modules/
+
+ .DS_Store/
+build/
+
+dev/
+
+.env
+.env.*.local
+
+
+*.log
+
+
+.vscode/
+.vercel
