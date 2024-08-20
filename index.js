@@ -1,4 +1,5 @@
 require("dotenv").config();
+const xss = require("xss");
 const express = require("express");
 const session = require("express-session");
 const cors = require("./middleware/cors.middleware");
@@ -6,12 +7,31 @@ const helmet = require("helmet");
 const tolstoyRouter = require("./routes/tolstoy.routes");
 
 const PORT = process.env.PORT;
-const baseUrl = process.env.BASE_URL;
 const secretKey = process.env.SECRET_KEY;
+
+const cleanObject = (obj) => {
+  if (typeof obj === "string") {
+    return xss(obj);
+  }
+  if (typeof obj === "object") {
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        obj[key] = cleanObject(obj[key]);
+      }
+    }
+  }
+
+  return obj;
+};
 
 const app = express();
 app.use(cors);
 app.use(express.json());
+
+app.use((req, res, next) => {
+  req.body = cleanObject(req.body);
+  next();
+});
 
 app.use(
   session({
@@ -34,7 +54,7 @@ app.use(
         scriptSrc: ["'self'"],
         styleSrc: ["'self'"],
         imgSrc: ["'self'"],
-        connectSrc: ["'self'", baseUrl],
+        connectSrc: ["'self'"],
       },
     },
   })
