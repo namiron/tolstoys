@@ -2,10 +2,9 @@ require("dotenv").config();
 const xss = require("xss");
 const express = require("express");
 const session = require("express-session");
-const cors = require(cors);
+const cors = require("cors");
 const helmet = require("helmet");
 const tolstoyRouter = require("./routes/tolstoy.routes");
-const csurf = require("csurf");
 
 const PORT = process.env.PORT;
 const secretKey = process.env.SECRET_KEY;
@@ -64,13 +63,6 @@ app.use(
     },
   })
 );
-
-app.use(csurf({ cookie: { httpOnly: true, secure: true, sameSite: "lax" } }));
-
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
