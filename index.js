@@ -6,6 +6,7 @@ const cors = require("./middleware/cors.middleware");
 const helmet = require("helmet");
 const tolstoyRouter = require("./routes/tolstoy.routes");
 const csurf = require("csurf");
+
 const PORT = process.env.PORT;
 const secretKey = process.env.SECRET_KEY;
 
@@ -45,6 +46,13 @@ app.use(
   })
 );
 
+app.use(csurf({ cookie: { httpOnly: true, secure: true, sameSite: "lax" } }));
+
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -58,18 +66,20 @@ app.use(
     },
   })
 );
-app.use(csurf({ cookie: { httpOnly: true, secure: true, sameSite: "lax" } }));
-
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
 app.use("/urls", tolstoyRouter);
+
+app.use((err, req, res, next) => {
+  if (err.code === "EBADCSRFTOKEN") {
+    res.status(403).send("Form tampered with");
+  } else {
+    next(err);
+  }
+});
 
 const start = async () => {
   try {
