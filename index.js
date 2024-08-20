@@ -2,7 +2,7 @@ require("dotenv").config();
 const xss = require("xss");
 const express = require("express");
 const session = require("express-session");
-const cors = require("./middleware/cors.middleware");
+const cors = require(cors);
 const helmet = require("helmet");
 const tolstoyRouter = require("./routes/tolstoy.routes");
 const csurf = require("csurf");
@@ -26,8 +26,12 @@ const cleanObject = (obj) => {
 
 const app = express();
 
- 
-app.use(cors);
+const corsOptions = {
+  origin: "https://tolstoyc.vercel.app",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use((req, res, next) => {
   req.body = cleanObject(req.body);
@@ -61,10 +65,8 @@ app.use(
   })
 );
 
- 
 app.use(csurf({ cookie: { httpOnly: true, secure: true, sameSite: "lax" } }));
 
- 
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   next();
