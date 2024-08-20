@@ -25,9 +25,10 @@ const cleanObject = (obj) => {
 };
 
 const app = express();
+
+ 
 app.use(cors);
 app.use(express.json());
-
 app.use((req, res, next) => {
   req.body = cleanObject(req.body);
   next();
@@ -46,13 +47,6 @@ app.use(
   })
 );
 
-app.use(csurf({ cookie: { httpOnly: true, secure: true, sameSite: "lax" } }));
-
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
-
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -67,19 +61,20 @@ app.use(
   })
 );
 
+ 
+app.use(csurf({ cookie: { httpOnly: true, secure: true, sameSite: "lax" } }));
+
+ 
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
 app.use("/urls", tolstoyRouter);
-
-app.use((err, req, res, next) => {
-  if (err.code === "EBADCSRFTOKEN") {
-    res.status(403).send("Form tampered with");
-  } else {
-    next(err);
-  }
-});
 
 const start = async () => {
   try {
