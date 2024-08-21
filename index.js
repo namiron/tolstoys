@@ -28,7 +28,11 @@ const app = express();
 const corsOptions = {
   origin: "https://tolstoyc.vercel.app",
   credentials: true,
+  methods: "GET,POST",
+  allowedHeaders: "Content-Type",
 };
+
+app.options("*", cors(corsOptions));
 
 app.use(cors(corsOptions));
 app.use(express.json());

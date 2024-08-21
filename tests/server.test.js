@@ -41,3 +41,30 @@ describe("Metadata Fetching Test", () => {
     ]);
   }, 40000);
 });
+
+describe("CORS Test", () => {
+  it("should include CORS headers in the response", async () => {
+    const response = await request(app).get("/").expect(200);
+
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      "https://tolstoyc.vercel.app"
+    );
+  });
+});
+
+describe("Preflight OPTIONS Request Test", () => {
+  it("should respond with correct CORS headers for OPTIONS request", async () => {
+    const response = await request(app)
+      .options("/urls/fetch-metadata")
+      .set("Origin", "https://tolstoyc.vercel.app")
+      .set("Access-Control-Request-Method", "POST")
+      .expect(204);
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      "https://tolstoyc.vercel.app"
+    );
+    expect(response.headers["access-control-allow-methods"]).toBe("GET,POST");
+    expect(response.headers["access-control-allow-headers"]).toBe(
+      "Content-Type, Authorization"
+    );
+  });
+});
