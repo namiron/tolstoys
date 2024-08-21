@@ -4,6 +4,7 @@ const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
 const helmet = require("helmet");
+const crypto = require("crypto");
 const tolstoyRouter = require("./routes/tolstoy.routes");
 
 const PORT = process.env.PORT;
@@ -67,6 +68,26 @@ app.use(
     },
   })
 );
+
+app.get("/api/get-secret-token", (req, res) => {
+  try {
+    if (!secretKey) {
+      return res.status(500).json({ message: "Secret key not configured." });
+    }
+
+  
+    const token = crypto
+      .createHmac("sha256", secretKey)
+      .update(crypto.randomBytes(64).toString("hex"))
+      .digest("hex");
+
+    res.json({ token });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error generating token: " + error.message });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
